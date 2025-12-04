@@ -427,7 +427,7 @@ CStringA CDayDlg::EscapeJsonString(const CStringA& str)
 {
 	CStringA result;
 	for (int i = 0; i < str.GetLength(); i++) {
-		char c = str[i];
+		unsigned char c = (unsigned char)str[i];  // unsigned로 처리!
 		switch (c) {
 		case '\"': result += "\\\""; break;
 		case '\\': result += "\\\\"; break;
@@ -440,11 +440,11 @@ CStringA CDayDlg::EscapeJsonString(const CStringA& str)
 			if (c < 0x20) {
 				// 제어 문자는 \uXXXX 형태로
 				CStringA hex;
-				hex.Format("\\u%04x", (unsigned char)c);
+				hex.Format("\\u%04x", c);
 				result += hex;
 			}
 			else {
-				result += c;
+				result += (char)c;  // 다시 char로 변환하여 추가
 			}
 		}
 	}

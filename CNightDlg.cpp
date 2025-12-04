@@ -300,8 +300,8 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 	else if (strJson.Find("\"op\": \"CHAT\"") != -1 || strJson.Find("\"op\": \"MAFIA_CHAT\"") != -1)
 	{
 		// 디버깅: JSON 원본 출력
-		FILE* fp = fopen("C:\\chat_debug.txt", "a");
-		if (fp) {
+		FILE* fp = nullptr;
+		if (fopen_s(&fp, "C:\\chat_debug.txt", "a") == 0 && fp) {
 			fprintf(fp, "=== Received JSON (Night) ===\n%s\n\n", strJson.GetString());
 			fclose(fp);
 		}
@@ -322,8 +322,8 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 			int nEnd = sText.Find('\"');
 			if (nEnd == -1) {
 				// 닫는 따옴표를 못 찾음 - 파싱 에러
-				FILE* fp = fopen("C:\\chat_debug.txt", "a");
-				if (fp) {
+				FILE* fp = nullptr;
+				if (fopen_s(&fp, "C:\\chat_debug.txt", "a") == 0 && fp) {
 					fprintf(fp, "[ERROR] Cannot find closing quote in: %s\n\n", sText.GetString());
 					fclose(fp);
 				}

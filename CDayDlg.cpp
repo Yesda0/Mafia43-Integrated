@@ -315,7 +315,8 @@ void CDayDlg::ParseChat(const CStringA& strJsonA)
 	int nText = strJsonA.Find("\"text\": \"");
 	if (nText != -1) {
 		CStringA sText = strJsonA.Mid(nText + 9);
-		sText = sText.Left(sText.Find('\"'));
+		int nEnd = sText.Find('\"');
+		if (nEnd != -1) sText = sText.Left(nEnd);
 
 		CString msg;
 		if (nFromNumber > 0)

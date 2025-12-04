@@ -312,9 +312,18 @@ void CDayDlg::ParseChat(const CStringA& strJsonA)
 	}
 
 	// 텍스트 추출
+	CStringA sText = "";
 	int nText = strJsonA.Find("\"text\": \"");
 	if (nText != -1) {
-		CStringA sText = strJsonA.Mid(nText + 9);
+		sText = strJsonA.Mid(nText + 9);  // "text": " 다음부터
+	} else {
+		nText = strJsonA.Find("\"text\":\"");  // 공백 없는 경우
+		if (nText != -1) {
+			sText = strJsonA.Mid(nText + 8);  // "text":" 다음부터
+		}
+	}
+
+	if (!sText.IsEmpty()) {
 		int nEnd = sText.Find('\"');
 		if (nEnd != -1) sText = sText.Left(nEnd);
 

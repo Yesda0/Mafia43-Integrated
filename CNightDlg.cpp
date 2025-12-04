@@ -299,9 +299,18 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 	else if (strJson.Find("\"op\": \"CHAT\"") != -1 || strJson.Find("\"op\": \"MAFIA_CHAT\"") != -1)
 	{
 		CString text = _T("");
+		CStringA sText = "";
 		int nText = strJson.Find("\"text\": \"");
 		if (nText != -1) {
-			CStringA sText = strJson.Mid(nText + 9);
+			sText = strJson.Mid(nText + 9);  // "text": " 다음부터
+		} else {
+			nText = strJson.Find("\"text\":\"");  // 공백 없는 경우
+			if (nText != -1) {
+				sText = strJson.Mid(nText + 8);  // "text":" 다음부터
+			}
+		}
+
+		if (!sText.IsEmpty()) {
 			int nEnd = sText.Find('\"');
 			if (nEnd != -1) sText = sText.Left(nEnd);
 			text = CString(CA2T(sText, CP_UTF8));

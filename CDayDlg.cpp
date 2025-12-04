@@ -164,8 +164,9 @@ void CDayDlg::OnBnClickedButtonSendChat()
 	UpdateData(TRUE);
 	if (m_strChatMsg.IsEmpty() || !m_pSocket) return;
 
+	CStringA escapedText = EscapeJsonString(CStr_to_CStrA(m_strChatMsg));
 	CStringA strJson;
-	strJson.Format("{\"op\":\"DAY_CHAT\", \"text\":\"%s\"}", (LPCSTR)CStr_to_CStrA(m_strChatMsg));
+	strJson.Format("{\"op\":\"DAY_CHAT\", \"text\":\"%s\"}", (LPCSTR)escapedText);
 	m_pSocket->SendJson(strJson);
 
 	m_strChatMsg = _T(""); UpdateData(FALSE); GetDlgItem(IDC_EDIT_CHAT)->SetFocus();
@@ -332,7 +333,16 @@ void CDayDlg::ParseChat(const CStringA& strJsonA)
 
 	if (!sText.IsEmpty()) {
 		int nEnd = sText.Find('\"');
-		if (nEnd != -1) sText = sText.Left(nEnd);
+		if (nEnd == -1) {
+			// 닫는 따옴표를 못 찾음 - 파싱 에러
+			FILE* fp = fopen("C:\\chat_debug.txt", "a");
+			if (fp) {
+				fprintf(fp, "[ERROR] Cannot find closing quote in: %s\n\n", sText.GetString());
+				fclose(fp);
+			}
+			return;  // 에러 발생 시 메시지 표시 안 함
+		}
+		sText = sText.Left(nEnd);
 
 		CString msg;
 		if (nFromNumber > 0)
@@ -412,6 +422,34 @@ void CDayDlg::ParseVoteResult(const CStringA& strJsonA) {}
 
 CStringA CDayDlg::CStr_to_CStrA(const CString& strT) { CT2A utf8(strT, CP_UTF8); return CStringA(utf8); }
 CString CDayDlg::CStrA_to_CStr(const CStringA& strA) { CA2T utf8(strA, CP_UTF8); return CString(utf8); }
+
+CStringA CDayDlg::EscapeJsonString(const CStringA& str)
+{
+	CStringA result;
+	for (int i = 0; i < str.GetLength(); i++) {
+		char c = str[i];
+		switch (c) {
+		case '\"': result += "\\\""; break;
+		case '\\': result += "\\\\"; break;
+		case '\b': result += "\\b"; break;
+		case '\f': result += "\\f"; break;
+		case '\n': result += "\\n"; break;
+		case '\r': result += "\\r"; break;
+		case '\t': result += "\\t"; break;
+		default:
+			if (c < 0x20) {
+				// 제어 문자는 \uXXXX 형태로
+				CStringA hex;
+				hex.Format("\\u%04x", (unsigned char)c);
+				result += hex;
+			}
+			else {
+				result += c;
+			}
+		}
+	}
+	return result;
+}
 
 CStringA CDayDlg::ExtractJsonStringField(const CStringA& json, const CStringA& fieldName)
 {

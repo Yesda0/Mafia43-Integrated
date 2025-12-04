@@ -210,7 +210,8 @@ void CNightDlg::OnClickedSend()
 	if (m_pSocket) {
 		CStringA strJson;
 		CT2A asciiMsg(msg, CP_UTF8);
-		strJson.Format("{\"op\": \"NIGHT_CHAT\", \"text\": \"%s\"}", (LPCSTR)asciiMsg);
+		CStringA escapedText = EscapeJsonString(CStringA(asciiMsg));
+		strJson.Format("{\"op\": \"NIGHT_CHAT\", \"text\": \"%s\"}", (LPCSTR)escapedText);
 		m_pSocket->SendJson(strJson);
 	}
 
@@ -319,7 +320,16 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 
 		if (!sText.IsEmpty()) {
 			int nEnd = sText.Find('\"');
-			if (nEnd != -1) sText = sText.Left(nEnd);
+			if (nEnd == -1) {
+				// 닫는 따옴표를 못 찾음 - 파싱 에러
+				FILE* fp = fopen("C:\\chat_debug.txt", "a");
+				if (fp) {
+					fprintf(fp, "[ERROR] Cannot find closing quote in: %s\n\n", sText.GetString());
+					fclose(fp);
+				}
+				return 0;  // 에러 발생 시 메시지 표시 안 함
+			}
+			sText = sText.Left(nEnd);
 			text = CString(CA2T(sText, CP_UTF8));
 		}
 
@@ -398,4 +408,32 @@ BOOL CNightDlg::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_ESCAPE) return TRUE;
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+CStringA CNightDlg::EscapeJsonString(const CStringA& str)
+{
+	CStringA result;
+	for (int i = 0; i < str.GetLength(); i++) {
+		char c = str[i];
+		switch (c) {
+		case '\"': result += "\\\""; break;
+		case '\\': result += "\\\\"; break;
+		case '\b': result += "\\b"; break;
+		case '\f': result += "\\f"; break;
+		case '\n': result += "\\n"; break;
+		case '\r': result += "\\r"; break;
+		case '\t': result += "\\t"; break;
+		default:
+			if (c < 0x20) {
+				// 제어 문자는 \uXXXX 형태로
+				CStringA hex;
+				hex.Format("\\u%04x", (unsigned char)c);
+				result += hex;
+			}
+			else {
+				result += c;
+			}
+		}
+	}
+	return result;
 }

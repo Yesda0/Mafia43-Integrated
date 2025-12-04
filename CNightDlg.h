@@ -81,4 +81,5 @@ public:
 	void InitPlayerList();
 	void AppendChat(CString strMsg);
 	void RequestPhaseChange(bool bNotifyServer);
+	CStringA EscapeJsonString(const CStringA& str);  // JSON 특수문자 이스케이프
 };

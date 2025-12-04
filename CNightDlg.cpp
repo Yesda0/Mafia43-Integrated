@@ -319,8 +319,11 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 		}
 
 		if (!sText.IsEmpty()) {
-			int nEnd = sText.Find('\"');
-			if (nEnd == -1) {
+			// UTF-8 바이트를 바이트 레벨에서 검색 (strchr 사용)
+			const char* pText = sText.GetString();
+			const char* pQuote = strchr(pText, '\"');
+
+			if (pQuote == nullptr) {
 				// 닫는 따옴표를 못 찾음 - 파싱 에러
 				FILE* fp = nullptr;
 				if (fopen_s(&fp, "chat_debug.txt", "a") == 0 && fp) {
@@ -329,6 +332,8 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 				}
 				return 0;  // 에러 발생 시 메시지 표시 안 함
 			}
+
+			int nEnd = (int)(pQuote - pText);
 			sText = sText.Left(nEnd);
 			text = CString(CA2T(sText, CP_UTF8));
 		}

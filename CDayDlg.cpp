@@ -296,6 +296,13 @@ void CDayDlg::ProcessServerMessage(CStringA strJsonA)
 
 void CDayDlg::ParseChat(const CStringA& strJsonA)
 {
+	// 디버깅: JSON 원본 출력
+	FILE* fp = fopen("C:\\chat_debug.txt", "a");
+	if (fp) {
+		fprintf(fp, "=== Received JSON ===\n%s\n\n", strJsonA.GetString());
+		fclose(fp);
+	}
+
 	// 플레이어 번호 추출
 	int nFromNumber = 0;
 	int nFromNumPos = strJsonA.Find("\"from_number\"");

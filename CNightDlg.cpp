@@ -298,6 +298,13 @@ LRESULT CNightDlg::OnReceiveMsg(WPARAM wParam, LPARAM lParam)
 	// 3. 채팅
 	else if (strJson.Find("\"op\": \"CHAT\"") != -1 || strJson.Find("\"op\": \"MAFIA_CHAT\"") != -1)
 	{
+		// 디버깅: JSON 원본 출력
+		FILE* fp = fopen("C:\\chat_debug.txt", "a");
+		if (fp) {
+			fprintf(fp, "=== Received JSON (Night) ===\n%s\n\n", strJson.GetString());
+			fclose(fp);
+		}
+
 		CString text = _T("");
 		CStringA sText = "";
 		int nText = strJson.Find("\"text\": \"");

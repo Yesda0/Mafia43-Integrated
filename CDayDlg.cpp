@@ -297,9 +297,9 @@ void CDayDlg::ProcessServerMessage(CStringA strJsonA)
 
 void CDayDlg::ParseChat(const CStringA& strJsonA)
 {
-	// 디버깅: JSON 원본 출력
+	// 디버깅: JSON 원본 출력 (프로그램 실행 폴더에 저장)
 	FILE* fp = nullptr;
-	if (fopen_s(&fp, "C:\\chat_debug.txt", "a") == 0 && fp) {
+	if (fopen_s(&fp, "chat_debug.txt", "a") == 0 && fp) {
 		fprintf(fp, "=== Received JSON ===\n%s\n\n", strJsonA.GetString());
 		fclose(fp);
 	}
@@ -336,7 +336,7 @@ void CDayDlg::ParseChat(const CStringA& strJsonA)
 		if (nEnd == -1) {
 			// 닫는 따옴표를 못 찾음 - 파싱 에러
 			FILE* fp = nullptr;
-			if (fopen_s(&fp, "C:\\chat_debug.txt", "a") == 0 && fp) {
+			if (fopen_s(&fp, "chat_debug.txt", "a") == 0 && fp) {
 				fprintf(fp, "[ERROR] Cannot find closing quote in: %s\n\n", sText.GetString());
 				fclose(fp);
 			}

@@ -92,11 +92,22 @@ BOOL CNightDlg::OnInitDialog()
 	m_cmbAction.ResetContent();
 	m_cmbAction.AddString(_T("NONE"));
 
-	if (m_strMyRole == _T("마피아")) m_cmbAction.AddString(_T("KILL"));
-	else if (m_strMyRole == _T("의사")) m_cmbAction.AddString(_T("SAVE"));
-	else if (m_strMyRole == _T("경찰")) m_cmbAction.AddString(_T("CHECK"));
-
-	m_cmbAction.SetCurSel(0);
+	// 역할별 능력 추가 및 기본 선택 설정
+	if (m_strMyRole == _T("마피아")) {
+		m_cmbAction.AddString(_T("KILL"));
+		m_cmbAction.SetCurSel(1);  // 마피아는 KILL이 기본값
+	}
+	else if (m_strMyRole == _T("의사")) {
+		m_cmbAction.AddString(_T("SAVE"));
+		m_cmbAction.SetCurSel(1);  // 의사는 SAVE가 기본값
+	}
+	else if (m_strMyRole == _T("경찰")) {
+		m_cmbAction.AddString(_T("CHECK"));
+		m_cmbAction.SetCurSel(1);  // 경찰은 CHECK가 기본값
+	}
+	else {
+		m_cmbAction.SetCurSel(0);  // 시민은 NONE이 기본값
+	}
 	InitPlayerList();
 	SetTimer(1, 1000, nullptr);
 

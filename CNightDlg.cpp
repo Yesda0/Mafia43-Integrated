@@ -154,11 +154,13 @@ void CNightDlg::OnTimer(UINT_PTR nIDEvent)
 				if (m_pSocket)
 					m_pSocket->SendJson("{\"op\": \"NIGHT_ACTION\", \"target\": \"NONE\"}");
 
+				m_bActionSubmitted = true;
 				m_btnConfirm.EnableWindow(FALSE);
 				m_cmbAction.EnableWindow(FALSE);
 				m_playerList.EnableWindow(FALSE);
 			}
-			RequestPhaseChange(true);
+			// NEXT_PHASE를 보내지 않음 - 서버가 모든 플레이어 액션을 받으면 자동 전환
+			AppendChat(_T("다른 플레이어들을 기다리는 중...\r\n"));
 		}
 	}
 	CDialogEx::OnTimer(nIDEvent);

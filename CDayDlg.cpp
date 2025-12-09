@@ -129,14 +129,17 @@ void CDayDlg::OnTimer(UINT_PTR nIDEvent)
 		}
 		else {
 			KillTimer(1);
-			AppendTextToRichEdit(_T("[알림] 토론 시간이 종료되었습니다. 투표 집계 중...\r\n"), RGB(255, 0, 0));
+			AppendTextToRichEdit(_T("[알림] 토론 시간이 종료되었습니다.\r\n"), RGB(255, 0, 0));
 			GetDlgItem(IDC_BUTTON_VOTE)->EnableWindow(FALSE);
 
-			bool bAmIHost = false;
-			for (const auto& p : m_vecDayPlayers) {
-				if (p.strUID == m_strMyUID && p.bIsHost) { bAmIHost = true; break; }
+			// 투표를 안 했으면 기권(SKIP) 투표 전송
+			if (!m_bVoteSubmitted && m_pSocket) {
+				m_pSocket->SendJson("{\"op\":\"DAY_VOTE\", \"target\":\"SKIP\"}");
+				m_bVoteSubmitted = true;
+				AppendTextToRichEdit(_T("[알림] 시간 초과로 기권 처리되었습니다.\r\n"), RGB(128, 128, 128));
 			}
-			RequestPhaseChange(true);
+			// NEXT_PHASE를 보내지 않음 - 서버가 모든 플레이어 투표를 받으면 자동 전환
+			AppendTextToRichEdit(_T("[알림] 다른 플레이어들을 기다리는 중...\r\n"), RGB(128, 128, 128));
 		}
 	}
 	CDialogEx::OnTimer(nIDEvent);
@@ -190,6 +193,7 @@ void CDayDlg::OnBnClickedButtonVote()
 		CStringA strJson;
 		strJson.Format("{\"op\":\"DAY_VOTE\", \"target\":\"%s\"}", (LPCSTR)CStr_to_CStrA(strTargetUID));
 		m_pSocket->SendJson(strJson);
+		m_bVoteSubmitted = true;
 		GetDlgItem(IDC_BUTTON_VOTE)->EnableWindow(FALSE);
 		AppendTextToRichEdit(_T("[알림] 투표를 완료했습니다.\r\n"), RGB(0, 0, 255));
 	}
